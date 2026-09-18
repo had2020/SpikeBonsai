@@ -1,9 +1,11 @@
 #include <cstdint>
+#include <ios>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
 
+/*
 struct NeuralNode {
     uint64_t weights[64];
     uint8_t thresholds[64]; // 4 working outputs max
@@ -30,8 +32,17 @@ struct NodeNet {
     ;
     };*/
 
+void forward(
+    std::vector<uint64_t> weights,
+    std::vector<uint8_t> thresholds,
+    std::vector<uint32_t> left_node_ptr,
+    std::vector<uint32_t> right_node_ptr
+) {
+
+}
+
 int main() {
-    uint64_t *st_ptr;
+    //uint64_t *st_ptr;
     //uint64_t node_count = 8;
     //st_ptr = malloc(sizeof(struct NeuralNode) << node_count);
 
@@ -46,14 +57,29 @@ int main() {
     std::vector<uint32_t> right_node_ptr = {};
 
     size_t amt = 128;
-    weights.reserve(amt);
-    thresholds.reserve(amt);
+    inputs.reserve(amt); // TODO
+    weights.reserve(amt * 64);
+    thresholds.reserve(amt * 64);
+    left_node_ptr.reserve(amt);
+    right_node_ptr.reserve(amt);
 
-    for (uint32_t i = 0; i < 128; i++) {
-        printf("%d ", i);
+    // RAII
+    for (uint32_t i = 128; i > 0; i--) {
+        //printf("i: %d, ", i);
         weights.push_back(0);
         thresholds.push_back(0);
+        if ((i % 64) == 0) {
+            //printf("per 64: %d\n", i);
+            left_node_ptr.push_back(0);
+            right_node_ptr.push_back(0);
+        }
     }
+
+    printf("Total: allocated memory: %d bytes\n", (
+        weights.capacity() + thresholds.capacity() + left_node_ptr.capacity() + right_node_ptr.capacity()
+    ));
+
+
 
     return 0;
 }
