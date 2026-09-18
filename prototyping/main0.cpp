@@ -49,9 +49,10 @@ int main() {
     weights.reserve(amt);
     thresholds.reserve(amt);
 
-    for (uint32_t i = 0; i > 0; i++) {
-        weights[i] = 0;
-        thresholds[i] = 0;
+    for (uint32_t i = 0; i < 128; i++) {
+        printf("%d ", i);
+        weights.push_back(0);
+        thresholds.push_back(0);
     }
 
     return 0;
