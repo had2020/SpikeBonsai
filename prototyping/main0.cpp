@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <ios>
+#include <iterator>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,7 +62,28 @@ void forward(
     }
 }
 
-
+void train(
+    std::vector<uint64_t> inputs,
+    std::vector<uint64_t> weights,
+    std::vector<uint8_t> thresholds,
+    size_t layers,
+    size_t n_per_layer,
+    size_t amt
+) {
+    uint64_t input_i = n_per_layer;
+    // layer level
+    for (size_t i = (amt * 64); i > 0; i--) {
+        // nueron level
+        uint64_t output = 0;
+        for (size_t j = 64; j > 0; j--) {
+            size_t k = i + j;
+            uint64_t diff_sel = !(inputs[input_i] ^ weights[k]);
+            uint64_t active_bits = std::__popcount(diff_sel);
+            uint64_t bit = (active_bits >= ( (uint64_t) thresholds[k]));
+            output |= bit << k;
+        }
+    }
+}
 
 int main() {
     //uint64_t *st_ptr;
