@@ -33,12 +33,22 @@ struct NodeNet {
     };*/
 
 void forward(
+    std::vector<uint64_t> inputs,
     std::vector<uint64_t> weights,
     std::vector<uint8_t> thresholds,
     std::vector<uint32_t> left_node_ptr,
-    std::vector<uint32_t> right_node_ptr
+    std::vector<uint32_t> right_node_ptr,
+    size_t layers,
+    size_t n_per_layer,
+    size_t amt
 ) {
-
+    uint64_t input = inputs[0];
+    size_t iters = (amt * 64);
+    for (size_t i = iters; i > 0; i--) {
+        if ((i % 64) == 0 ) {
+            input = iters - i;
+        }
+    }
 }
 
 int main() {
@@ -55,9 +65,13 @@ int main() {
     // per 64
     std::vector<uint32_t> left_node_ptr = {};
     std::vector<uint32_t> right_node_ptr = {};
+    // per layer
+    std::vector<uint64_t> inputs = {};
 
+    size_t layers = 0;
     size_t amt = 128;
-    inputs.reserve(amt); // TODO
+    size_t n_per_layer = (amt / (layers + 1));
+    inputs.reserve(n_per_layer);
     weights.reserve(amt * 64);
     thresholds.reserve(amt * 64);
     left_node_ptr.reserve(amt);
@@ -74,12 +88,17 @@ int main() {
             right_node_ptr.push_back(0);
         }
     }
+    for (uint32_t i = 0; i < layers; i++ ) {
+        inputs.push_back(0);
+    }
 
-    printf("Total: allocated memory: %d bytes\n", (
-        weights.capacity() + thresholds.capacity() + left_node_ptr.capacity() + right_node_ptr.capacity()
+    printf("Total: allocated memory: %u bytes\n", (
+        weights.capacity() +
+        thresholds.capacity() +
+        left_node_ptr.capacity() +
+        right_node_ptr.capacity() +
+        inputs.capacity()
     ));
-
-
 
     return 0;
 }
