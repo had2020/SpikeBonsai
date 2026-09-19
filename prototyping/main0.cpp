@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstdint>
 #include <ios>
 #include <stdint.h>
@@ -37,27 +38,30 @@ void forward(
     std::vector<uint64_t> inputs,
     std::vector<uint64_t> weights,
     std::vector<uint8_t> thresholds,
-    std::vector<uint32_t> left_node_ptr,
-    std::vector<uint32_t> right_node_ptr,
     size_t layers,
     size_t n_per_layer,
     size_t amt
 ) {
-    uint64_t input = inputs[0];
-    size_t iters = (amt * 64);
-    for (size_t i = iters; i > 0; i--) {
-        uint64_t diff_sel = !(inputs[i] ^ weights[i]);
-        uint64_t active_bits = std::__popcount(diff_sel);
-        uint64_t bit = (active_bits >= ( (uint64_t) thresholds[i]));
-
-        // TODO handle output to next layer
-        // inputs should be set to carry the next outputs according to child ptr.
-
-        if ((i % 64) == 0 ) {
-            input = iters - i;
+    uint64_t input_i = n_per_layer;
+    // layer level
+    for (size_t i = (amt * 64); i > 0; i--) {
+        // nueron level
+        uint64_t output = 0;
+        for (size_t j = 64; j > 0; j--) {
+            size_t k = i + j;
+            uint64_t diff_sel = !(inputs[input_i] ^ weights[k]);
+            uint64_t active_bits = std::__popcount(diff_sel);
+            uint64_t bit = (active_bits >= ( (uint64_t) thresholds[k]));
+            output |= bit << k;
         }
+
+        // TODO handle outputs being carried to next layer via inputs buffer
+        inputs[input_i] = output;
+        input_i --;
     }
 }
+
+
 
 int main() {
     //uint64_t *st_ptr;
@@ -71,8 +75,8 @@ int main() {
     std::vector<uint64_t> weights = {};
     std::vector<uint8_t> thresholds = {};
     // per 64
-    std::vector<uint32_t> left_node_ptr = {};
-    std::vector<uint32_t> right_node_ptr = {};
+    std::vector<size_t> left_node_ptr = {};
+    std::vector<size_t> right_node_ptr = {};
     // per layer
     std::vector<uint64_t> inputs = {};
 
@@ -82,19 +86,20 @@ int main() {
     inputs.reserve(n_per_layer);
     weights.reserve(amt * 64);
     thresholds.reserve(amt * 64);
-    left_node_ptr.reserve(amt);
-    right_node_ptr.reserve(amt);
+    //left_node_ptr.reserve(amt);
+    //right_node_ptr.reserve(amt);
 
     // RAII
     for (uint32_t i = 128; i > 0; i--) {
         //printf("i: %d, ", i);
         weights.push_back(0);
         thresholds.push_back(0);
+        /*
         if ((i % 64) == 0) {
             //printf("per 64: %d\n", i);
             left_node_ptr.push_back(0);
             right_node_ptr.push_back(0);
-        }
+        } */
     }
     for (uint32_t i = 0; i < layers; i++ ) {
         inputs.push_back(0);
