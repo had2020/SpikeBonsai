@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include "bit"
 
 /*
 struct NeuralNode {
@@ -45,6 +46,13 @@ void forward(
     uint64_t input = inputs[0];
     size_t iters = (amt * 64);
     for (size_t i = iters; i > 0; i--) {
+        uint64_t diff_sel = !(inputs[i] ^ weights[i]);
+        uint64_t active_bits = std::__popcount(diff_sel);
+        uint64_t bit = (active_bits >= ( (uint64_t) thresholds[i]));
+
+        // TODO handle output to next layer
+        // inputs should be set to carry the next outputs according to child ptr.
+
         if ((i % 64) == 0 ) {
             input = iters - i;
         }
